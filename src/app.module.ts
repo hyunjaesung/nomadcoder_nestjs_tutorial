@@ -8,7 +8,7 @@ import { AppService } from './app.service';
 
 @Module({
   imports: [],
-  controllers: [AppController],
+  controllers: [AppController], // express의 router 같은 것
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {} // 루트 모듈 같은 개념
