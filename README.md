@@ -112,6 +112,10 @@ export class AppService {
 ### movie controller
 
 ```
+nest g c
+```
+
+```
 @Controller('movies') // 'movies' 요부분을 써주 면 엔트리 포인트로 관리함, 도메인/moives 라우트로 특별하게 취급
 export class MoviesController {
   @Get()
@@ -153,6 +157,93 @@ export class MoviesController {
       updateMovie: potato,
       ...potato2,
     };
+  }
+}
+```
+
+### 서비스 만들기
+
+```
+nest g s
+```
+
+단일책임 원칙으로 service를 만들어서 로직관리 하는 역할을 넘기자
+
+```
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Movie } from './entities/movie.entity';
+
+@Injectable()
+export class MoviesService {
+  // 여기서 데이터 베이스를 다루자
+  private movies: Movie[] = [];
+
+  getAll(): Movie[] {
+    return this.movies;
+  }
+
+  getOne(id: string): Movie {
+    const movie = this.movies.find((movie) => movie.id === parseInt(id));
+    if (!movie) {
+      // nest 에서 기본제공하는 에러 모듈;
+      throw new NotFoundException(`Movie With ID ${id} not found.`);
+    }
+    return movie;
+  }
+
+  deleteOne(id: string) {
+    this.getOne(id); // 없는거 지울때 에러 던져서 방어
+    this.movies = this.movies.filter((movie) => movie.id !== parseInt(id));
+  }
+
+  create(movieData) {
+    this.movies.push({
+      id: this.movies.length + 1,
+      ...movieData,
+    });
+  }
+  update(id: string, updateData) {
+    const movie = this.getOne(id);
+    this.deleteOne(id); // 지우고
+    // 업데이트 로직
+    this.movies.push({ ...movie, ...updateData });
+  }
+}
+```
+
+```
+@Controller('movies') // 'movies' 요부분을 써주 면 엔트리 포인트로 관리함, 도메인/moives 라우트로 특별하게 취급
+export class MoviesController {
+  // 수동으로 import 하는게 아니라 요청을 해야한다
+  constructor(private readonly moviesService: MoviesService) {}
+  @Get()
+  getAll(): Movie[] {
+    return this.moviesService.getAll();
+  }
+
+  @Get(':id') // 추가 라우팅 가능하게
+  getOne(@Param('id') potato: string): Movie {
+    // @Param 데코레이터로 요청해야지만 상위 데코레이터가 변수 전달해준다
+    return this.moviesService.getOne(potato);
+  }
+
+  @Post()
+  create(@Body() potato) {
+    // @Body 데코레이터로 요청해서 받은 데이터 가져올 수 있음
+    // Body도 Param과 마찬가지로 요청하면 준다
+    return this.moviesService.create(potato);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') potato: string) {
+    return this.moviesService.deleteOne(potato);
+  }
+
+  @Patch(':id') // Patch 를 쓰면 일부분만 업데이트 가능
+  update(@Param('id') potato: string, @Body() potato2) {
+    // @Body 로 요청 하면 준다
+    // json 을 받아도 자동으로 이해해서 반환한다
+    return this.moviesService.update(potato, potato2);
   }
 }
 ```
