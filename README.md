@@ -161,7 +161,7 @@ export class MoviesController {
 }
 ```
 
-### 서비스 만들기
+### movie service
 
 ```
 nest g s
@@ -170,6 +170,17 @@ nest g s
 단일책임 원칙으로 service를 만들어서 로직관리 하는 역할을 넘기자
 
 ```
+// entities
+export class Movie {
+  id: number;
+  title: string;
+  year: number;
+  genres: string[];
+}
+```
+
+```
+// service
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Movie } from './entities/movie.entity';
 
@@ -212,6 +223,7 @@ export class MoviesService {
 ```
 
 ```
+// controller
 @Controller('movies') // 'movies' 요부분을 써주 면 엔트리 포인트로 관리함, 도메인/moives 라우트로 특별하게 취급
 export class MoviesController {
   // 수동으로 import 하는게 아니라 요청을 해야한다
@@ -245,5 +257,14 @@ export class MoviesController {
     // json 을 받아도 자동으로 이해해서 반환한다
     return this.moviesService.update(potato, potato2);
   }
+}
+```
+
+```
+// DTO Data transfer object
+export class CreateMovieDto {
+  readonly title: string;
+  readonly year: number;
+  readonly genres: string[];
 }
 ```
