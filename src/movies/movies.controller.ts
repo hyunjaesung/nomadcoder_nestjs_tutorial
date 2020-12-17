@@ -18,6 +18,7 @@ import { UpdateMovieDto } from './dto/update-movie.dto';
 export class MoviesController {
   // 수동으로 import 하는게 아니라 요청을 해야한다
   constructor(private readonly moviesService: MoviesService) {}
+  // 타입스크립트 덕분에 바로 주입이된다
   @Get()
   getAll(): Movie[] {
     return this.moviesService.getAll();
